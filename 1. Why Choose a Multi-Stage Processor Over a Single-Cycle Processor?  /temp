@@ -1,1 +1,33 @@
 
+  
+**i. Single Cycle Processor**
+
+- Before diving into the multi-stage pipeline processor, let's first understand the singlecycle processor. Then we can see why pipelining is important.
+-  [  Image]
+
+-  A Single Cycle RISC-V Processor is a basic CPU design in which every
+instruction is executed in exactly one clock cycle.
+- This includes all five stages of instruction execution: instruction fetch, decode,
+execute, memory access, and write-back.
+
+
+
+- Program:
+
+```
+main:
+addi x1, x0, 5
+addi x2, x0, 10
+add x3, x2, x1
+```
+
+- **Demo Video**
+
+[![Watch the video](https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_)
+
+- [Image]
+- No need to handle data, control, or structural hazards since there’s no overlap between
+instructions.
+- The clock cycle has to be long enough to finish the slowest instruction so faster
+instructions waste time.
+- Only one instruction runs at a time, so it’s slow overall.

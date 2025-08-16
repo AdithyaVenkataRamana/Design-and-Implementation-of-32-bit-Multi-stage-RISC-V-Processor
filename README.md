@@ -74,3 +74,28 @@ be stored(SW).
 - After an instruction finishes calculating, we store the result into register in the register
 file. 
 
+- Let us understand the pipeline stages in a multi-stage processor by taking an example. 
+- Program:
+
+```
+text
+main:
+addi x1, x0, 5
+addi x2, x0, 10
+nop
+nop
+add x3, x2, x1 
+```
+
+- **Demo Video**
+
+[![Watch the video]([https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_](https://drive.google.com/file/d/1kfnzHK05PBeWIAu1yKHBBrIyfgy1o7B-%20/view?usp=drive_link))
+
+
+
+- [Image]
+
+-------------------------------------------------
+
+<details>
+<summary><b>Task 2:</b> Using Spike Simulation and Interactive Debugging Mode to Debugg the C code during Spike</summary> 

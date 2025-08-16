@@ -37,8 +37,8 @@ instructions waste time.
 - Only one instruction runs at a time, so it’s slow overall.
 
 
-
-
+</details>
+-------------------------------------------------
 <details>
 <summary><b>2. Why Choose a Multi-Stage Processor Over a Single-Cycle Processor?</b></summary>
 
@@ -94,8 +94,70 @@ add x3, x2, x1
 
 
 - [Image]
-
+</details>
 -------------------------------------------------
 
 <details>
-<summary><b>Task 2:</b> Using Spike Simulation and Interactive Debugging Mode to Debugg the C code during Spike</summary> 
+<summary><b></b> 3. Micro-Operations in Each Pipeline Stage</summary> 
+
+ [Image]
+- **IF_ID Stage:**
+  The instruction is fetched from memory using the program counter, and the PC is
+incremented by 4 to point to the next instruction.
+- **ID/EX Stage :**
+  The instruction is decoded, source registers are read, and control signals are generated
+for the next stage.
+- **EX/MEM Stage:**
+  The ALU performs the required operation such as arithmetic or address calculation, and
+the result is passed to the memory stage along with updated control signals.
+
+- **MEM/WB Stage:**
+  If it’s a load instruction, data is read from memory; otherwise, the ALU result is
+prepared to be written back to the register file.
+
+</details>
+-------------------------------------------------
+
+<details>
+<summary><b></b>4. Types of Hazards in a Multi-Stage Pipeline </summary> 
+
+  
+- **Data Hazards:**
+When an instruction depends on the result of a previous instruction that hasn’t yet
+completed.
+
+Example:
+```
+addi x1, x0, 5 # x1 = 5
+addi x2, x0, 10 # x2 = 10
+add x3, x1, x2 # x3 = x1 + x2 → data hazard here 
+
+```
+
+**Demo Video**
+[![Watch the video]([https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_](https://drive.google.com/file/d/1hl8igFd6qln0DeALkVckzusGewKk0ejF/view?usp=drive_link))
+
+-[Image]
+
+- add x3, x1, x2 is trying to read x1 and x2 in its ID stage.
+- But x1 and x2 haven’t reached WB yet, so their correct values aren't available yet.
+- This is a Read After Write (RAW) data hazard.
+
+- **Control Hazards:**
+Hazards caused by branch or jump instructions that change the program counter
+(PC). 
+- Example:
+  
+ - What's is hazard in this
+- Assume x1 = 5, x2 = 5 initially
+```
+addi x1, x0, 5 # x1 = 5
+addi x2, x0, 5 # x2 = 5
+beq x1, x2, target # If equal, jump to target
+addi x3, x0, 10 # This should be skipped if branch is taken
+addi x4, x0, 20 # This will be target
+target:
+addi x5, x0, 30 # This is where we land if beq taken 
+```
+
+

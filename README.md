@@ -7,7 +7,7 @@
 **i. Single Cycle Processor**
 
 - Before diving into the multi-stage pipeline processor, let's first understand the singlecycle processor. Then we can see why pipelining is important.
--  [  Image]
+<img width="747" height="244" alt="Image" src="https://github.com/user-attachments/assets/b6fbe355-b7ff-4f13-a39d-e4f6676bc349" />
 
 -  A Single Cycle RISC-V Processor is a basic CPU design in which every
 instruction is executed in exactly one clock cycle.
@@ -29,7 +29,7 @@ add x3, x2, x1
 
 [![Watch the video](https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_)
 
-- [Image]
+<img width="744" height="283" alt="Image" src="https://github.com/user-attachments/assets/f42cb67a-c48a-4520-abdb-77796764d357" />
 - No need to handle data, control, or structural hazards since there’s no overlap between
 instructions.
 - The clock cycle has to be long enough to finish the slowest instruction so faster
@@ -93,14 +93,14 @@ add x3, x2, x1
 
 
 
-- [Image]
+<img width="688" height="507" alt="Image" src="https://github.com/user-attachments/assets/e7445b82-0587-4c2b-9583-be36296b104f" />
 </details>
 -------------------------------------------------
 
 <details>
 <summary><b></b> 3. Micro-Operations in Each Pipeline Stage</summary> 
 
- [Image]
+<img width="1908" height="593" alt="Image" src="https://github.com/user-attachments/assets/ac1e4b32-6259-4dcd-ba41-fbefe5837ded" />
 - **IF_ID Stage:**
   The instruction is fetched from memory using the program counter, and the PC is
 incremented by 4 to point to the next instruction.
@@ -137,7 +137,7 @@ add x3, x1, x2 # x3 = x1 + x2 → data hazard here
 **Demo Video**
 [![Watch the video]([https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_](https://drive.google.com/file/d/1hl8igFd6qln0DeALkVckzusGewKk0ejF/view?usp=drive_link))
 
--[Image]
+<img width="936" height="627" alt="Image" src="https://github.com/user-attachments/assets/81460f42-11a3-4960-9fec-63c37ab26967" />
 
 - add x3, x1, x2 is trying to read x1 and x2 in its ID stage.
 - But x1 and x2 haven’t reached WB yet, so their correct values aren't available yet.
@@ -163,7 +163,7 @@ addi x5, x0, 30 # This is where we land if beq taken
 - **Demo Video**
 [![Watch the video]([https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_](https://drive.google.com/file/d/1IAJcRL9DWJ0aPErHSCn9yp1pkTqZmGHF/view?usp=drive_link))
 
-- [Image]
+<img width="1019" height="484" alt="Image" src="https://github.com/user-attachments/assets/4e974507-baf8-4a1f-bd46-e822242aaf4c" />
 - In a 5-stage pipeline (like in Ripes), branch instructions like beq are only
 resolved in the Execute (EX) stage, which is 2 cycles after the fetch.
 - The branch decision (beq) is only made in the Execute (EX) stage.
@@ -400,4 +400,5 @@ R[6] = 0
 R[7] = 0
 Memory[100] = 0
 testbench.sv:56: $finish called at 200 (1s) 
+  <img width="1814" height="783" alt="Image" src="https://github.com/user-attachments/assets/45edf2a0-daad-4e7d-91bf-d30bb0e1ee0c" />
 </details>

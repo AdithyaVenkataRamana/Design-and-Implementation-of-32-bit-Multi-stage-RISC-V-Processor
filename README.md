@@ -38,7 +38,7 @@ instructions waste time.
 
 
 </details>
--------------------------------------------------
+---------------------------------------------------
 <details>
 <summary><b>2. Why Choose a Multi-Stage Processor Over a Single-Cycle Processor?</b></summary>
 
@@ -95,7 +95,7 @@ add x3, x2, x1
 
 <img width="688" height="507" alt="Image" src="https://github.com/user-attachments/assets/e7445b82-0587-4c2b-9583-be36296b104f" />
 </details>
--------------------------------------------------
+---------------------------------------------------
 
 <details>
 <summary><b></b> 3. Micro-Operations in Each Pipeline Stage</summary> 
@@ -116,7 +116,7 @@ the result is passed to the memory stage along with updated control signals.
 prepared to be written back to the register file.
 
 </details>
--------------------------------------------------
+---------------------------------------------------
 
 <details>
 <summary><b></b>4. Types of Hazards in a Multi-Stage Pipeline </summary> 
@@ -194,7 +194,7 @@ these memory-related instructions don't actually read or write correctly.
 so it always works and updates x3.
 
 </details>
--------------------------------------------------
+--------------------------------------------------
 
 <details>
 <summary><b>5. Implementation of Multi stage RISC-V processor using Verilog</b></summary>
@@ -386,7 +386,7 @@ endmodule
 ```
 </details>
 
--------------------------------------------------
+--------------------------------------------
 <details>
 <summary><b>6. Result</b></summary>
 Final Register Values:

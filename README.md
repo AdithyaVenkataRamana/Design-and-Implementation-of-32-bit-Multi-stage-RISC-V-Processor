@@ -2,7 +2,7 @@
 -------------------------------------------------
 
 <details>
-<summary><b>1. Why Choose a Multi-Stage Processor Over a Single-Cycle Processor?:</b> </summary>
+<summary><b>1. Why Choose a Multi-Stage Processor Over a Single-Cycle Processor?</b> </summary>
   
 **i. Single Cycle Processor**
 

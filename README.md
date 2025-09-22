@@ -98,7 +98,21 @@ add x3, x2, x1
 
 
 
-<img width="688" height="507" alt="Image" src="https://github.com/user-attachments/assets/e7445b82-0587-4c2b-9583-be36296b104f" />
+# 📊 Pipelined Execution with Stalls/NOPs
+
+This table demonstrates the execution of instructions through a pipeline, including the insertion of No-Operation (NOP) instructions to handle potential hazards.
+
+| Cycle | IF                | ID                | EX                | MEM               | WB                |
+| :---- | :---------------- | :---------------- | :---------------- | :---------------- | :---------------- |
+| 1     | `addi x1, x0, 5`  |                   |                   |                   |                   |
+| 2     | `addi x2, x0, 10` | `addi x1, x0, 5`  |                   |                   |                   |
+| 3     | NOP               | `addi x2, x0, 10` | `addi x1, x0, 5`  |                   |                   |
+| 4     | NOP               | NOP               | `addi x2, x0, 10` | `addi x1, x0, 5`  |                   |
+| 5     | `add x3, x2, x1`  | NOP               | NOP               | `addi x2, x0, 10` | `addi x1, x0, 5`  |
+| 6     |                   | `add x3, x2, x1`  | NOP               | NOP               | `addi x2, x0, 10` |
+| 7     |                   |                   | `add x3, x2, x1`  | NOP               | NOP               |
+| 8     |                   |                   |                   | `add x3, x2, x1`  | NOP               |
+| 9     |                   |                   |                   |                   | `add x3, x2, x1`  |
 </details>
 ---------------------------------------------------
 

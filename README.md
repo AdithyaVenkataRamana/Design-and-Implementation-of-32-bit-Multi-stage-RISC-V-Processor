@@ -46,7 +46,10 @@ instructions waste time.
 
 
 </details>
----------------------------------------------------
+
+
+
+-----------------------
 <details>
 <summary><b>2. Stages in Multi stage pipelined processor</b></summary>
 

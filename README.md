@@ -117,7 +117,13 @@ This table demonstrates the execution of instructions through a pipeline, includ
 | 8     |                   |                   |                   | `add x3, x2, x1`  | NOP               |
 | 9     |                   |                   |                   |                   | `add x3, x2, x1`  |
 </details>
+
+
+
+
 ---------------------------------------------------
+
+
 
 <details>
 <summary><b></b> 3. Micro-Operations in Each Pipeline Stage</summary> 
@@ -152,7 +158,12 @@ The ALU performs the required operation such as arithmetic or address calculatio
 If it’s a load instruction, data is read from memory; otherwise, the ALU result is prepared to be written back to the register file.
 
 </details>
+
+
+
 ---------------------------------------------------
+
+
 
 <details>
 <summary><b></b>4. Types of Hazards in a Multi-Stage Pipeline </summary> 
@@ -252,7 +263,11 @@ these memory-related instructions don't actually read or write correctly.
 so it always works and updates x3.
 
 </details>
+
+
 --------------------------------------------------
+
+
 
 <details>
 <summary><b>5. Implementation of Multi stage RISC-V processor using Verilog</b></summary>

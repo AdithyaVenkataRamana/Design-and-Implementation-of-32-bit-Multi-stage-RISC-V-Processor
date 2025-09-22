@@ -229,7 +229,7 @@ addi x5, x0, 30 # This is where we land if beq taken
 - **Demo Video**
 [![Watch the video]([https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_](https://drive.google.com/file/d/1IAJcRL9DWJ0aPErHSCn9yp1pkTqZmGHF/view?usp=drive_link))
 
-**Pipelined Execution with Branch Instruction**
+- **Pipelined Execution with Branch Instruction**
 
 This table demonstrates the execution of instructions, including a branch (`beq`) instruction, through a 5-stage pipeline.
 

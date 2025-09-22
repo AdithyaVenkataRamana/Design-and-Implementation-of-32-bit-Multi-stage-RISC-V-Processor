@@ -40,7 +40,7 @@ instructions waste time.
 </details>
 ---------------------------------------------------
 <details>
-<summary><b>2. Why Choose a Multi-Stage Processor Over a Single-Cycle Processor?</b></summary>
+<summary><b>2. Stages in Multi stage pipelined processor</b></summary>
 
 - That's why we use a multi-stage processor, it runs faster and is more efficient than
 a single-cycle processor.

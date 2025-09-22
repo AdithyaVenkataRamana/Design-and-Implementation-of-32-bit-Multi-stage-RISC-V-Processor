@@ -189,7 +189,7 @@ add x3, x1, x2 # x3 = x1 + x2 → data hazard here
 **Demo Video**
 [![Watch the video]([https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_](https://drive.google.com/file/d/1hl8igFd6qln0DeALkVckzusGewKk0ejF/view?usp=drive_link))
 
-**Pipelined Execution (No Stalls)**
+- **Pipelined Execution (No Stalls)**
 
 This table demonstrates the direct execution of instructions through a 5-stage pipeline without data hazards requiring explicit stalls.
 

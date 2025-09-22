@@ -98,7 +98,7 @@ add x3, x2, x1
 
 
 
-# 📊 Pipelined Execution with Stalls/NOPs
+#  Pipelined Execution
 
 This table demonstrates the execution of instructions through a pipeline, including the insertion of No-Operation (NOP) instructions to handle potential hazards.
 
@@ -170,7 +170,19 @@ add x3, x1, x2 # x3 = x1 + x2 → data hazard here
 **Demo Video**
 [![Watch the video]([https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_](https://drive.google.com/file/d/1hl8igFd6qln0DeALkVckzusGewKk0ejF/view?usp=drive_link))
 
-<img width="936" height="627" alt="Image" src="https://github.com/user-attachments/assets/81460f42-11a3-4960-9fec-63c37ab26967" />
+#  Pipelined Execution (No Stalls)
+
+This table demonstrates the direct execution of instructions through a 5-stage pipeline without data hazards requiring explicit stalls.
+
+| Cycle | IF                | ID                | EX                | MEM               | WB                |
+| :---- | :---------------- | :---------------- | :---------------- | :---------------- | :---------------- |
+| 1     | `addi x1, x0, 5`  |                   |                   |                   |                   |
+| 2     | `addi x2, x0, 10` | `addi x1, x0, 5`  |                   |                   |                   |
+| 3     | `add x3, x1, x2`  | `addi x2, x0, 10` | `addi x1, x0, 5`  |                   |                   |
+| 4     |                   | `add x3, x1, x2`  | `addi x2, x0, 10` | `addi x1, x0, 5`  |                   |
+| 5     |                   |                   | `add x3, x1, x2`  | `addi x2, x0, 10` | `addi x1, x0, 5`  |
+| 6     |                   |                   |                   | `add x3, x1, x2`  | `addi x2, x0, 10` |
+| 7     |                   |                   |                   |                   | `add x3, x1, x2`  |
 
 - add x3, x1, x2 is trying to read x1 and x2 in its ID stage.
 - But x1 and x2 haven’t reached WB yet, so their correct values aren't available yet.
@@ -196,7 +208,17 @@ addi x5, x0, 30 # This is where we land if beq taken
 - **Demo Video**
 [![Watch the video]([https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_](https://drive.google.com/file/d/1IAJcRL9DWJ0aPErHSCn9yp1pkTqZmGHF/view?usp=drive_link))
 
-<img width="1019" height="484" alt="Image" src="https://github.com/user-attachments/assets/4e974507-baf8-4a1f-bd46-e822242aaf4c" />
+# Pipelined Execution with Branch Instruction
+
+This table demonstrates the execution of instructions, including a branch (`beq`) instruction, through a 5-stage pipeline.
+
+| Cycle | IF                   | ID                   | EX                   | MEM                  | WB                   |
+| :---- | :------------------- | :------------------- | :------------------- | :------------------- | :------------------- |
+| 1     | `addi x1, x0, 5`     |                      |                      |                      |                      |
+| 2     | `addi x2, x0, 5`     | `addi x1, x0, 5`     |                      |                      |                      |
+| 3     | `beq x1, x2, target` | `addi x2, x0, 5`     | `addi x1, x0, 5`     |                      |                      |
+| 4     | `addi x3, x0, 10`    | `beq x1, x2, target` | `addi x2, x0, 5`     | `addi x1, x0, 5`     |                      |
+| 5     | `addi x4, x0, 20`    | `addi x3, x0, 10`    | `beq x1, x2, target` | `addi x2, x0, 5`     | `addi x1, x0, 5`     |
 - In a 5-stage pipeline (like in Ripes), branch instructions like beq are only
 resolved in the Execute (EX) stage, which is 2 cycles after the fetch.
 - The branch decision (beq) is only made in the Execute (EX) stage.

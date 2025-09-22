@@ -103,7 +103,7 @@ add x3, x2, x1
 
 
 
-**Pipelined Execution**
+- **Pipelined Execution**
 
 This table demonstrates the execution of instructions through a pipeline, including the insertion of No-Operation (NOP) instructions to handle potential hazards.
 

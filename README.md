@@ -130,10 +130,7 @@ This table demonstrates the execution of instructions through a pipeline, includ
 <details>
 <summary><b></b> 3. Micro-Operations in Each Pipeline Stage</summary> 
  <br>
-
-<img width="1908" height="593" alt="Image" src="https://github.com/user-attachments/assets/ac1e4b32-6259-4dcd-ba41-fbefe5837ded" />
-
-
+<img width="1792" height="576" alt="Image" src="https://github.com/user-attachments/assets/794d6bbf-c1d0-4362-8a00-00b34bcb7b13" />
 A breakdown of the different stages in the pipeline.
 
 

@@ -30,7 +30,7 @@ add x3, x2, x1
 
 [![Watch the video](https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_)
 
-**Processor Pipeline Execution Example**
+- **Processor Pipeline Execution Example**
 
 This table illustrates the execution of a sequence of instructions through a 5-stage pipeline, showing the activity in each stage across different cycles.
 

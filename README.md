@@ -29,7 +29,15 @@ add x3, x2, x1
 
 [![Watch the video](https://img.youtube.com/vi/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/0.jpg)](https://drive.google.com/file/d/19tvVzC2Peg3M1gEwgkp9zjb7W3Y67ugn/view?usp=drive_)
 
-<img width="744" height="283" alt="Image" src="https://github.com/user-attachments/assets/f42cb67a-c48a-4520-abdb-77796764d357" />
+# Processor Pipeline Execution Example
+
+This table illustrates the execution of a sequence of instructions through a 5-stage pipeline, showing the activity in each stage across different cycles.
+
+| Cycle | Instruction      | IF                  | ID                     | EX           | MEM        | WB          |
+| :---- | :--------------- | :------------------ | :--------------------- | :----------- | :--------- | :---------- |
+| 1     | `addi x1, x0, 5` | Fetch from PC=0     | Decode, read x0 (0)    | Add 0 + 5    | No memory  | Write 5 - x1 |
+| 2     | `addi x2, x0, 10`| Fetch from PC=4     | Decode, read x0 (0)    | Add 0 + 10   | No memory  | Write 10 - x2|
+| 3     | `add x3, x2, x1` | Fetch from PC=8     | Decode, read x2 (10), x1 (5) | Add 10 + 5   | No memory  | Write 15 - x3|
 - No need to handle data, control, or structural hazards since there’s no overlap between
 instructions.
 - The clock cycle has to be long enough to finish the slowest instruction so faster

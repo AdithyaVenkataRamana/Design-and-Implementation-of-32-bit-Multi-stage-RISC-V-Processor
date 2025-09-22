@@ -42,9 +42,6 @@ instructions waste time.
 <details>
 <summary><b>2. Stages in Multi stage pipelined processor</b></summary>
 
-- That's why we use a multi-stage processor, it runs faster and is more efficient than
-a single-cycle processor.
-
 - Stages in Multi stage pipelined processor
   ## stage pipeline:
 IF → ID → EX → MEM → WB
@@ -101,19 +98,33 @@ add x3, x2, x1
 <summary><b></b> 3. Micro-Operations in Each Pipeline Stage</summary> 
 
 <img width="1908" height="593" alt="Image" src="https://github.com/user-attachments/assets/ac1e4b32-6259-4dcd-ba41-fbefe5837ded" />
-- **IF_ID Stage:**
-  The instruction is fetched from memory using the program counter, and the PC is
-incremented by 4 to point to the next instruction.
-- **ID/EX Stage :**
-  The instruction is decoded, source registers are read, and control signals are generated
-for the next stage.
-- **EX/MEM Stage:**
-  The ALU performs the required operation such as arithmetic or address calculation, and
-the result is passed to the memory stage along with updated control signals.
 
-- **MEM/WB Stage:**
-  If it’s a load instruction, data is read from memory; otherwise, the ALU result is
-prepared to be written back to the register file.
+
+A breakdown of the different stages in the pipeline.
+
+
+
+### **IF/ID Stage**
+
+The instruction is fetched from memory using the program counter, and the PC is incremented by 4 to point to the next instruction.
+
+
+
+### **ID/EX Stage**
+
+The instruction is decoded, source registers are read, and control signals are generated for the next stage.
+
+
+
+### **EX/MEM Stage**
+
+The ALU performs the required operation such as arithmetic or address calculation, and the result is passed to the memory stage along with updated control signals.
+
+
+
+### **MEM/WB Stage**
+
+If it’s a load instruction, data is read from memory; otherwise, the ALU result is prepared to be written back to the register file.
 
 </details>
 ---------------------------------------------------

@@ -3,6 +3,7 @@
 
 <details>
 <summary><b>1. Why Choose a Multi-Stage Processor Over a Single-Cycle Processor?</b> </summary>
+<br>
   
 **i. Single Cycle Processor**
 
@@ -53,8 +54,9 @@ instructions waste time.
 <details>
 <summary><b>2. Stages in Multi stage pipelined processor</b></summary>
 
-- Stages in Multi stage pipelined processor
-  ## stage pipeline:
+<br> 
+
+  ## Stage pipeline:
 IF → ID → EX → MEM → WB
 
 
@@ -127,6 +129,7 @@ This table demonstrates the execution of instructions through a pipeline, includ
 
 <details>
 <summary><b></b> 3. Micro-Operations in Each Pipeline Stage</summary> 
+ <br>
 
 <img width="1908" height="593" alt="Image" src="https://github.com/user-attachments/assets/ac1e4b32-6259-4dcd-ba41-fbefe5837ded" />
 
@@ -168,6 +171,8 @@ If it’s a load instruction, data is read from memory; otherwise, the ALU resul
 <details>
 <summary><b></b>4. Types of Hazards in a Multi-Stage Pipeline </summary> 
 
+<br> 
+
 
 ## Data Hazards:
 When an instruction depends on the result of a previous instruction that hasn’t yet
@@ -201,6 +206,8 @@ This table demonstrates the direct execution of instructions through a 5-stage p
 - add x3, x1, x2 is trying to read x1 and x2 in its ID stage.
 - But x1 and x2 haven’t reached WB yet, so their correct values aren't available yet.
 - This is a Read After Write (RAW) data hazard.
+
+<br>
 
 ## Control Hazards:
 Hazards caused by branch or jump instructions that change the program counter
@@ -239,7 +246,9 @@ resolved in the Execute (EX) stage, which is 2 cycles after the fetch.
 - Meanwhile, the next instructions (addi x3, addi x4) are already fetched and
 possibly entered decode or execute stages.
 - This creates a Control Hazard — the CPU is unsure whether to continue with
-x3/x4 or jump to target. 
+x3/x4 or jump to target.
+
+<br>
 
 ## Structural Hazard:
 A Structural Hazard occurs when hardware resources are not sufficient to support

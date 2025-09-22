@@ -202,203 +202,293 @@ so it always works and updates x3.
 - Design:
   
 ```
-module pipe_riscv32(clk1, clk2);
- input clk1, clk2;
- reg [31:0] pc, IF_ID_IR, IF_ID_NPC;
- reg [31:0] ID_EX_IR, ID_EX_NPC, ID_EX_A, ID_EX_B, ID_EX_Imm;
- reg [2:0] ID_EX_type, EX_MEM_type, MEM_WB_type;
- reg [31:0] EX_MEM_IR, EX_MEM_ALUOut, EX_MEM_B;
- reg EX_MEM_cond;
- reg [31:0] MEM_WB_IR, MEM_WB_ALUOut, MEM_WB_LMD;
- reg [31:0] Reg [0:31]; // Register Bank 32x32
- reg [31:0] MEM [0:1023]; // Memory 1024x32
- reg HALTED;
- reg TAKEN_BRANCH;
- parameter ADD = 6'b000000,
- SUB = 6'b000001,
- AND = 6'b000010,
- OR = 6'b000011,
- SLT = 6'b000100,
- MUL = 6'b000101,
- HLT = 6'b111111,
- LW = 6'b001000,
- SW = 6'b001001,
- ADDI= 6'b001010,
- SUBI= 6'b001011,
- SLTI= 6'b001100,
- BNEQZ=6'b001101,
- BEQZ= 6'b001110;
- parameter RR_ALU = 3'b000,
- RM_ALU = 3'b001,
- LOAD = 3'b010,
- STORE = 3'b011,
- BRANCH = 3'b100,
- HALT = 3'b101;
- // IF Stage
- always @(posedge clk1)
- if (HALTED == 0) begin
- if (((EX_MEM_IR[31:26] == BEQZ) && (EX_MEM_cond == 1)) ||
- ((EX_MEM_IR[31:26] == BNEQZ) && (EX_MEM_cond == 0))) begin
- IF_ID_IR <= #2 MEM[EX_MEM_ALUOut];
- TAKEN_BRANCH <= #2 1'b1;
- IF_ID_NPC <= #2 EX_MEM_ALUOut + 1;
- pc <= #2 EX_MEM_ALUOut + 1;
- end else begin
- IF_ID_IR <= #2 MEM[pc];
- IF_ID_NPC <= #2 pc + 1;
- pc <= #2 pc + 1;
- end
- end
- // ID Stage
- always @(posedge clk2)
- if (HALTED == 0) begin
- ID_EX_A <= #2 Reg[IF_ID_IR[25:21]];
- if (IF_ID_IR[20:16] == 5'b00000)
- ID_EX_B <= #2 0;
- else
- ID_EX_B <= #2 Reg[IF_ID_IR[20:16]];
- ID_EX_NPC <= #2 IF_ID_NPC;
- ID_EX_IR <= #2 IF_ID_IR;
- ID_EX_Imm <= #2 {{16{IF_ID_IR[15]}}, IF_ID_IR[15:0]}; // sign-extend imm
- case (IF_ID_IR[31:26])
- ADD, SUB, AND, OR, SLT, MUL: ID_EX_type <= #2 RR_ALU;
- ADDI, SUBI, SLTI: ID_EX_type <= #2 RM_ALU;
- LW: ID_EX_type <= #2 LOAD;
- SW: ID_EX_type <= #2 STORE;
- BNEQZ, BEQZ: ID_EX_type <= #2 BRANCH;
- HLT: ID_EX_type <= #2 HALT;
- default: ID_EX_type <= #2 HALT;
- endcase
- end
- // EX Stage
- always @(posedge clk1)
- if (HALTED == 0) begin
- EX_MEM_type <= #2 ID_EX_type;
- EX_MEM_IR <= #2 ID_EX_IR;
- TAKEN_BRANCH <= #2 0;
- case (ID_EX_type)
- RR_ALU: begin
- case (ID_EX_IR[31:26])
- ADD: EX_MEM_ALUOut <= #2 ID_EX_A + ID_EX_B;
- SUB: EX_MEM_ALUOut <= #2 ID_EX_A - ID_EX_B;
- AND: EX_MEM_ALUOut <= #2 ID_EX_A & ID_EX_B;
- OR: EX_MEM_ALUOut <= #2 ID_EX_A | ID_EX_B;
- MUL: EX_MEM_ALUOut <= #2 ID_EX_A * ID_EX_B;
- SLT: EX_MEM_ALUOut <= #2 (ID_EX_A < ID_EX_B);
- default: EX_MEM_ALUOut <= #2 32'hxxxxxxxx;
- endcase
- end
- RM_ALU: begin
- case (ID_EX_IR[31:26])
- ADDI: EX_MEM_ALUOut <= #2 ID_EX_A + ID_EX_Imm;
- SUBI: EX_MEM_ALUOut <= #2 ID_EX_A - ID_EX_Imm;
- SLTI: EX_MEM_ALUOut <= #2 (ID_EX_A < ID_EX_Imm);
- default: EX_MEM_ALUOut <= #2 32'hxxxxxxxx;
- endcase
- end
- LOAD, STORE: begin
- EX_MEM_ALUOut <= #2 ID_EX_A + ID_EX_Imm;
- EX_MEM_B <= #2 ID_EX_B;
- end
- BRANCH: begin
- EX_MEM_ALUOut <= #2 ID_EX_NPC + ID_EX_Imm;
- EX_MEM_cond <= #2 (ID_EX_A == 0); // assuming zero check for branch
- end
- endcase
- end
- // MEM Stage
- always @(posedge clk2)
- if (HALTED == 0) begin
- MEM_WB_type <= #2 EX_MEM_type;
- MEM_WB_IR <= #2 EX_MEM_IR;
- case (EX_MEM_type)
- RR_ALU, RM_ALU: MEM_WB_ALUOut <= #2 EX_MEM_ALUOut;
- LOAD: MEM_WB_LMD <= #2 MEM[EX_MEM_ALUOut];
- STORE:
- if (TAKEN_BRANCH == 0)
- MEM[EX_MEM_ALUOut] <= #2 EX_MEM_B;
- endcase
- end
- // WB Stage
- always @(posedge clk1)
- if (HALTED == 0) begin
- if (TAKEN_BRANCH == 0)
- case (MEM_WB_type)
- RR_ALU: Reg[MEM_WB_IR[15:11]] <= #2 MEM_WB_ALUOut;
- RM_ALU, LOAD: Reg[MEM_WB_IR[20:16]] <= #2 (MEM_WB_type == LOAD
-? MEM_WB_LMD : MEM_WB_ALUOut);
- HALT: HALTED <= #2 1'b1;
- endcase
- end
-endmodule 
+`timescale 1ns / 1ps
+module pipe_rv32(clk1, clk2);
+    input clk1, clk2;
+
+    // Program counter and pipeline registers
+    reg [31:0] PC;
+    reg [31:0] IF_ID_IR, IF_ID_NPC;
+    reg [31:0] ID_EX_IR, ID_EX_NPC, ID_EX_A, ID_EX_B, ID_EX_Imm;
+    reg [2:0]  ID_EX_type, EX_MEM_type, MEM_WB_type;
+    reg [31:0] EX_MEM_IR, EX_MEM_ALUOUT, EX_MEM_B;
+    reg        EX_MEM_cond;
+    reg [31:0] MEM_WB_IR, MEM_WB_ALUOUT, MEM_WB_LMD;
+
+    reg [31:0] RegFile[0:31];
+    reg [31:0] Mem[0:1023];
+
+    reg HALTED;
+    reg TAKEN_BRANCH;
+
+    // Opcodes (7-bit fields)
+    parameter OP_R     = 7'b0110011; // R-type
+    parameter OP_I     = 7'b0010011; // ALU imm (ADDI, SLTI)
+    parameter OP_LOAD  = 7'b0000011; // LW
+    parameter OP_STORE = 7'b0100011; // SW
+    parameter OP_BRANCH= 7'b1100011; // BEQ/BNE
+    parameter HALTOP   = 7'b1111111; // custom HALT
+
+    // Simple instruction types for pipeline control
+    parameter TY_R   = 3'b000;
+    parameter TY_I   = 3'b001;
+    parameter TY_L   = 3'b010;
+    parameter TY_S   = 3'b011;
+    parameter TY_B   = 3'b100;
+    parameter TY_H   = 3'b101;
+
+    // IF stage (clk1)
+    always @(posedge clk1) begin
+        if (!HALTED) begin
+            // Branch resolution happens in EX stage; EX_MEM_ALUOUT holds branch target
+            if (((EX_MEM_IR[6:0] == OP_BRANCH) && EX_MEM_cond) && TAKEN_BRANCH == 0) begin
+                // If branch taken, fetch from branch target
+                IF_ID_IR  <= #2 Mem[EX_MEM_ALUOUT];
+                IF_ID_NPC <= #2 EX_MEM_ALUOUT + 1;
+                PC        <= #2 EX_MEM_ALUOUT + 1;
+                TAKEN_BRANCH <= #2 1'b1;
+            end else begin
+                IF_ID_IR  <= #2 Mem[PC];
+                IF_ID_NPC <= #2 PC + 1;
+                PC        <= #2 PC + 1;
+            end
+        end
+    end
+
+    // ID stage (clk2) - decode and read registers, immediate extraction
+    always @(posedge clk2) begin
+        if (!HALTED) begin
+            ID_EX_IR  <= #2 IF_ID_IR;
+            ID_EX_NPC <= #2 IF_ID_NPC;
+
+            // register indices per RISC-V: rs1 = [19:15], rs2 = [24:20]
+            if (IF_ID_IR[19:15] == 5'b00000) ID_EX_A <= #2 32'b0;
+            else ID_EX_A <= #2 RegFile[IF_ID_IR[19:15]];
+
+            if (IF_ID_IR[24:20] == 5'b00000) ID_EX_B <= #2 32'b0;
+            else ID_EX_B <= #2 RegFile[IF_ID_IR[24:20]];
+
+            // immediate extraction by opcode format
+            case (IF_ID_IR[6:0])
+                OP_I, OP_LOAD: begin
+                    // I-type: imm[11:0] = instr[31:20]
+                    ID_EX_Imm <= #2 {{20{IF_ID_IR[31]}}, IF_ID_IR[31:20]};
+                    ID_EX_type <= #2 TY_I;
+                    if (IF_ID_IR[6:0] == OP_LOAD) ID_EX_type <= #2 TY_L;
+                end
+                OP_R: begin
+                    ID_EX_Imm <= #2 32'b0;
+                    ID_EX_type <= #2 TY_R;
+                end
+                OP_STORE: begin
+                    // S-type: imm = instr[31:25] <<5 | instr[11:7]
+                    ID_EX_Imm <= #2 {{20{IF_ID_IR[31]}}, IF_ID_IR[31:25], IF_ID_IR[11:7]};
+                    ID_EX_type <= #2 TY_S;
+                end
+                OP_BRANCH: begin
+                    // B-type imm: [12|10:5|4:1|11] <<1 -> imm
+                    ID_EX_Imm <= #2 {{19{IF_ID_IR[31]}}, IF_ID_IR[31], IF_ID_IR[7], IF_ID_IR[30:25], IF_ID_IR[11:8], 1'b0};
+                    ID_EX_type <= #2 TY_B;
+                end
+                HALTOP: begin
+                    ID_EX_Imm <= #2 0;
+                    ID_EX_type <= #2 TY_H;
+                end
+                default: begin
+                    ID_EX_Imm <= #2 0;
+                    ID_EX_type <= #2 TY_H;
+                end
+            endcase
+        end
+    end
+
+    // EX stage (clk1) - ALU and branch target calculation
+    always @(posedge clk1) begin
+        if (!HALTED) begin
+            EX_MEM_type <= #2 ID_EX_type;
+            EX_MEM_IR   <= #2 ID_EX_IR;
+            TAKEN_BRANCH <= #2 0;
+            case (ID_EX_type)
+                TY_R: begin
+                    // R-type: funct7[31:25], funct3[14:12]
+                    case ({ID_EX_IR[31:25], ID_EX_IR[14:12]})
+                        // ADD: funct7=0000000, funct3=000
+                        {7'b0000000, 3'b000}: EX_MEM_ALUOUT <= #2 ID_EX_A + ID_EX_B;
+                        // SUB: funct7=0100000, funct3=000
+                        {7'b0100000, 3'b000}: EX_MEM_ALUOUT <= #2 ID_EX_A - ID_EX_B;
+                        // AND: funct3=111
+                        {7'b0000000, 3'b111}: EX_MEM_ALUOUT <= #2 (ID_EX_A & ID_EX_B);
+                        // OR: funct3=110
+                        {7'b0000000, 3'b110}: EX_MEM_ALUOUT <= #2 (ID_EX_A | ID_EX_B);
+                        // SLT: funct3=010 (set less than signed)
+                        {7'b0000000, 3'b010}: EX_MEM_ALUOUT <= #2 ($signed(ID_EX_A) < $signed(ID_EX_B) ? 32'd1 : 32'd0);
+                        default: EX_MEM_ALUOUT <= #2 32'hxxxx_xxxx;
+                    endcase
+                end
+                TY_I: begin
+                    // I-type arithmetic (ADDI, SLTI) or load (LW)
+                    case (ID_EX_IR[14:12]) // funct3
+                        3'b000: begin // ADDI
+                            EX_MEM_ALUOUT <= #2 ID_EX_A + ID_EX_Imm;
+                        end
+                        3'b010: begin // SLTI
+                            EX_MEM_ALUOUT <= #2 ($signed(ID_EX_A) < $signed(ID_EX_Imm) ? 32'd1 : 32'd0);
+                        end
+                        default: EX_MEM_ALUOUT <= #2 32'hxxxx_xxxx;
+                    endcase
+                end
+                TY_L, TY_S: begin
+                    // effective address = rs1 + imm
+                    EX_MEM_ALUOUT <= #2 ID_EX_A + ID_EX_Imm;
+                    EX_MEM_B <= #2 ID_EX_B; // store data for SW
+                end
+                TY_B: begin
+                    EX_MEM_ALUOUT <= #2 ID_EX_NPC + ID_EX_Imm; // branch target (NPC + imm)
+                    // branch conditions (funct3: 000=BEQ, 001=BNE)
+                    case (ID_EX_IR[14:12])
+                        3'b000: EX_MEM_cond <= #2 (ID_EX_A == ID_EX_B); // BEQ
+                        3'b001: EX_MEM_cond <= #2 (ID_EX_A != ID_EX_B); // BNE
+                        default: EX_MEM_cond <= #2 1'b0;
+                    endcase
+                end
+                TY_H: begin
+                    // nothing
+                end
+            endcase
+        end
+    end
+
+    // MEM stage (clk2)
+    always @(posedge clk2) begin
+        if (!HALTED) begin
+            MEM_WB_type <= #2 EX_MEM_type;
+            MEM_WB_IR   <= #2 EX_MEM_IR;
+            case (EX_MEM_type)
+                TY_R, TY_I: begin
+                    MEM_WB_ALUOUT <= #2 EX_MEM_ALUOUT;
+                end
+                TY_L: begin
+                    MEM_WB_LMD <= #2 Mem[EX_MEM_ALUOUT]; // word-addressed
+                end
+                TY_S: begin
+                    if (TAKEN_BRANCH == 0)
+                        Mem[EX_MEM_ALUOUT] <= #2 EX_MEM_B;
+                end
+            endcase
+        end
+    end
+
+    // WB stage (clk1)
+    always @(posedge clk1) begin
+        if (!HALTED) begin
+            if (TAKEN_BRANCH == 0) begin
+                case (MEM_WB_type)
+                    TY_R: begin
+                        // rd = instr[11:7]
+                        if (MEM_WB_IR[11:7] != 5'b00000)
+                            RegFile[MEM_WB_IR[11:7]] <= #2 MEM_WB_ALUOUT;
+                    end
+                    TY_I: begin
+                        // ADDI/SLTI write to rd (instr[11:7])
+                        if (MEM_WB_IR[11:7] != 5'b00000)
+                            RegFile[MEM_WB_IR[11:7]] <= #2 MEM_WB_ALUOUT;
+                    end
+                    TY_L: begin
+                        if (MEM_WB_IR[11:7] != 5'b00000)
+                            RegFile[MEM_WB_IR[11:7]] <= #2 MEM_WB_LMD;
+                    end
+                    TY_H: begin
+                        HALTED <= #2 1'b1;
+                    end
+                endcase
+            end
+        end
+    end
+
+    // initialization for simulation (optional, can be overridden by TB)
+    initial begin
+        HALTED = 0;
+        TAKEN_BRANCH = 0;
+    end
+endmodule
+
 ```
 
 - Test Bench:
 
  ```
-module pipe_riscv32_tb;
- reg clk1, clk2;
- integer i;
- // Instantiate the processor
- pipe_riscv32 DUT(clk1, clk2);
- // Clock generation
- initial begin
- clk1 = 0; clk2 = 0;
- forever begin
- #5 clk1 = ~clk1; // Toggle clk1 every 5 time units
- #5 clk2 = ~clk2; // Toggle clk2 after clk1
- end
- end
- // Initialize memory and registers
- initial begin
- // Clear register file and memory
- for (i = 0; i < 32; i = i + 1)
- DUT.Reg[i] = 0;
- for (i = 0; i < 1024; i = i + 1)
- DUT.MEM[i] = 32'h00000000;
- // -----------------------------
- // Program: Simple instruction flow
- // -----------------------------
- // ADDI R1, R0, #5 => R1 = 5
- // ADDI R2, R0, #10 => R2 = 10
- // ADD R3, R1, R2 => R3 = R1 + R2 = 15
- // SW R3, 100(R0) => MEM[100] = R3
- // LW R4, 100(R0) => R4 = MEM[100]
- // HLT
- DUT.MEM[0] = {6'b001010, 5'd0, 5'd1, 16'd5}; // ADDI R1, R0, 5
- DUT.MEM[1] = {6'b001010, 5'd0, 5'd2, 16'd10}; // ADDI R2, R0, 10
- DUT.MEM[2] = {6'b000000, 5'd1, 5'd2, 5'd3, 11'd0}; // ADD R3, R1, R2
- DUT.MEM[3] = {6'b111111, 26'd0}; // HLT
- // Reset control flags
- DUT.HALTED = 0;
- DUT.TAKEN_BRANCH = 0;
- DUT.pc = 0;
- // Simulation time
- #200;
- // Output Register Contents
- $display("\nFinal Register Values:");
- for (i = 0; i < 8; i = i + 1)
- $display("R[%0d] = %0d", i, DUT.Reg[i]);
- $display("\nMemory[100] = %0d", DUT.MEM[100]);
- $finish;
- end
-endmodule 
+`timescale 1ns / 1ps
+module test_rv32;
+    reg clk1, clk2;
+    integer k;
+    pipe_rv32 cpu (clk1, clk2);
+
+    // two-phase clock generator (repeat 50 cycles)
+    initial begin
+        clk1 = 0; clk2 = 0;
+        repeat (50) begin
+            #5 clk1 = 1; #5 clk1 = 0;
+            #5 clk2 = 1; #5 clk2 = 0;
+        end
+    end
+
+    initial begin
+        // init registers (x0..x31)
+        for (k = 0; k < 32; k = k + 1) cpu.RegFile[k] = k;
+
+        // Program (word-addressed memory). Encodings:
+        // ADDI x1,x0,10   => opcode OP_I (0010011), funct3=000, rd=1, rs1=0, imm=10
+        // ADDI x2,x0,20
+        // ADDI x3,x0,25
+        // ADD  x4,x1,x2   => R-type (0110011) funct3=000 funct7=0000000 rd=4 rs1=1 rs2=2
+        // ADD  x5,x2,x3
+        // HALT (custom)
+        cpu.Mem[0] = 32'b00000000001000000000000010010011; // ADDI x1, x0, 10  (imm=10 -> 000000001010)
+        // Wait: above literal is not 10; to avoid manual binary mistakes we'll build hex constants.
+        // Using easier hex encodings below (I provide correct hex values):
+        cpu.Mem[0] = 32'h00A00093; // ADDI x1, x0, 10  (imm=10 => 0x00A)
+        cpu.Mem[1] = 32'h01400113; // ADDI x2, x0, 20  (imm=20 => 0x014)
+        cpu.Mem[2] = 32'h01900193; // ADDI x3, x0, 25  (imm=25 => 0x019)
+        cpu.Mem[3] = 32'h002081B3; // ADD x3? careful: we'll place ADD x4,x1,x2 (rd=4, rs1=1, rs2=2)
+        cpu.Mem[3] = 32'h0020A193; // placeholder (but we'll overwrite with working R-type below)
+        // Proper R-type: funct7=0000000 rs2=2 rs1=1 funct3=000 rd=4 opcode=0110011
+        // binary: 0000000 00010 00001 000 00100 0110011 -> hex:
+        cpu.Mem[3] = 32'b0000000_00010_00001_000_00100_0110011; // ADD x4,x1,x2
+        cpu.Mem[4] = 32'b0000000_00011_00010_000_00101_0110011; // ADD x5,x2,x3
+        // HALT custom opcode in low bits (just use opcode = 7'b1111111 -> put in bits [6:0])
+        cpu.Mem[5] = 32'hFFFF_FF7F; // HALT (custom)
+
+        // reset control vars
+        cpu.HALTED = 0;
+        cpu.PC = 0;
+        cpu.TAKEN_BRANCH = 0;
+
+        // wait for program to execute
+        #400;
+
+        // display some registers
+        for (k = 0; k < 6; k = k + 1)
+            $display("x%0d = %0d", k, cpu.RegFile[k]);
+    end
+
+    initial begin
+        $dumpfile("rv32.vcd");
+        $dumpvars(0, test_rv32);
+        #600 $finish;
+    end
+endmodule
+
 ```
 </details>
 
 --------------------------------------------
 <details>
 <summary><b>6. Result</b></summary>
-Final Register Values:
-R[0] = 0
-R[1] = 5
-R[2] = 10
-R[3] = 5
-R[4] = 0
-R[5] = 0
-R[6] = 0
-R[7] = 0
-Memory[100] = 0
-testbench.sv:56: $finish called at 200 (1s) 
-  <img width="1814" height="783" alt="Image" src="https://github.com/user-attachments/assets/45edf2a0-daad-4e7d-91bf-d30bb0e1ee0c" />
+x0 = 0
+x1 = 10
+x2 = 20
+x3 = 25
+x4 = 30
+x5 = 45
+  <img width="1814" height="724" alt="Image" src="https://github.com/user-attachments/assets/0fcbc3c3-8bb4-48c2-9b01-a4cf841bc790" />
 </details>
